@@ -6,9 +6,13 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.520"]
                  [cljsjs/ajv "6.10.0-0"]]
-
   :plugins [[lein-cljsbuild "1.1.7"]
             [lein-figwheel "0.5.19"]]
+
+  :profiles {:dev {:dependencies [[cider/piggieback "0.4.2"]
+                                  [figwheel-sidecar "0.5.19"]]
+                   :repl-options {:nrepl-middleware
+                                  [cider.piggieback/wrap-cljs-repl]}}}
 
   :figwheel {:readline false}
   :cljsbuild {:builds [{:id "app"

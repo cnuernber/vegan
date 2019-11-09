@@ -14,10 +14,14 @@
   (->> (.readFileSync fs fname)
        (.parse js/JSON)))
 
+(defn dirname
+  []
+  js/__dirname)
+
 
 (defn load-resource-json-file
   [fname]
-  (load-json-file (str js/__dirname "/" fname)))
+  (load-json-file (str "resources/" fname)))
 
 
 (def vega-schema (delay (load-resource-json-file "vega-schema.json")))
@@ -61,8 +65,7 @@
 
 
 (defmulti validate-vega-json
-  (fn [json-data]
-    (infer-vega-type json-data)))
+  infer-vega-type)
 
 
 (defmethod validate-vega-json :vega
@@ -77,20 +80,114 @@
 
 (defn validate-file
   [fname]
+  (let [{:keys [errors warnings]}
+        (-> (load-json-file fname)
+            (validate-vega-json))
+        errors? (seq errors)
+        warnings? (seq warnings)]
+    (cond
+      errors?
+      (do
+        (println "Errors:")
+        (println errors))
+      warnings?
+      (do
+        (println "Warnings:")
+        (println warnings)
+        ))
+    (if errors -1 0)))
+
+
+(defmulti vega-json->view
+  infer-vega-type)
+
+
+(def vega (js/require "vega"))
+(def vega-lite (js/require "vega-lite"))
+
+
+(defmethod vega-json->view :vega
+  [json-data]
+  (let [runtime (.parse vega (load-json-file "bar-chart.vg.json"))]
+    (new (aget vega "View") runtime)))
+
+
+(defmethod vega-json->view :vega-lite
+  [json-data]
+  (let [runtime (->> (.compile vega-lite json-data)
+                     (.parse vega))]
+    (new (aget vega "View") runtime)))
+
+
+(defn fname->vega-view
+  [fname]
   (-> (load-json-file fname)
-      (validate-vega-json)))
+      vega-json->view))
+
+
+(defn render-vega-json
+  [json-data output-fname]
+  (let [view (vega-json->view json-data)
+        format (-> (str/split output-fname #"\.")
+                   (last)
+                   (.toLowerCase))
+        pdf? (= "pdf" format)
+        svg? (= "svg" format)]
+    (if (not svg?)
+      (-> (.toCanvas view 1.0 (when pdf?
+                                (clj->js {"type" "pdf"})))
+          (.then (fn [canvas]
+                   (try
+                     (let [buffer (cond
+                                    (or (= "jpg" format)
+                                        (= "jpeg" format))
+                                    (.toBuffer canvas "image/jpeg")
+                                    (= "png" format)
+                                    (.toBuffer canvas "image/png")
+                                    (= "pdf" format)
+                                    (.toBuffer canvas "application/pdf"))]
+                       (.writeFileSync fs output-fname buffer)
+                       (println "successfully wrote" output-fname))
+                     (catch :default e
+                       (println "ERROR!!" e))))))
+      (-> (.toSVG view)
+          (.then (fn [svg-text]
+                   (try
+                     (.writeFileSync fs output-fname svg-text)
+                     (println "successfully wrote" output-fname)
+                     (catch :default e
+                       (println "ERROR!!" e)))))))))
+
+(defn render-file
+  [src-fname dst-fname]
+  (-> (load-json-file src-fname)
+      (render-vega-json dst-fname)))
+
+(defn usage
+  []
+  (println "Arguments:
+-v, --validate fname - validate vega file indicated by fname.
+-r --render src-file dst-file - render vega to a png, svg, jpg, or pdf file.")
+  0)
 
 
 (defn -main [& args]
-  ;; (-> (validate-file (first args))
-  ;;     println)
-  )
+  (let [cmd (first args)]
+    (cond
+      (or (= "--validate" cmd)
+          (= "-v" cmd))
+      (do
+        (assert (= 2 (count args)))
+        (validate-file (second args)))
+      (or (= "--render" cmd)
+          (= "-r" cmd))
+      (do
+        (assert (= 3 (count args)))
+        (let [validate-result (validate-file (nth args 1))]
+          (when (= 0 validate-result)
+            (render-file (nth args 1) (nth args 2)))
+          validate-result))
+      :else
+      (usage))))
 
 (set! *main-cli-fn* -main)
-
-(def vega (js/require "vega"))
-
-(defn test-view
-  []
-  (let [runtime (.parse vega (load-json-file "bar-chart.vg.json"))]
-    (new (aget vega "View") runtime)))

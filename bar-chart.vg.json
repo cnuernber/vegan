@@ -39,7 +39,7 @@
 
   "axes": [
       { "orient": "top", "scale": "xscale", "domain": false, "grid":true },
-    { "orient": "left", "scale": "yscale" }
+      { "orient": "left", "scale": "yscale" }
   ],
 
   "marks": [
