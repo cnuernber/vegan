@@ -1,0 +1,11 @@
+{
+   "name": "vegan",
+   "version": "1.0.0",
+   "bin": {
+      "vegan": "app.js"
+   },
+   "dependencies": {
+      "canvas": "2.6.0",
+      "vega": "5.7.3"
+   }
+}

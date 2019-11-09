@@ -82,7 +82,15 @@
 
 
 (defn -main [& args]
-  (-> (validate-file (first args))
-      println))
+  ;; (-> (validate-file (first args))
+  ;;     println)
+  )
 
 (set! *main-cli-fn* -main)
+
+(def vega (js/require "vega"))
+
+(defn test-view
+  []
+  (let [runtime (.parse vega (load-json-file "bar-chart.vg.json"))]
+    (new (aget vega "View") runtime)))
