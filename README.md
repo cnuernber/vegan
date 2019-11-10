@@ -22,6 +22,11 @@ Arguments:
 -r --render src-file dst-file - render vega to a png, svg, jpg, or pdf file.
 ```
 
+* ![pdf output](images/bar-chart.pdf)
+* ![png output](images/bar-chart.png)
+* ![jpeg output](images/bar-chart.jpg)
+* ![svg output](images/bar-chart.svg)
+
 
 ## Next Steps
 
