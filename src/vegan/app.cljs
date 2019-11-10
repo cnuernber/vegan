@@ -1,6 +1,7 @@
 (ns vegan.app
   (:require [clojure.string :as str]
-            [cljs.nodejs :as nodejs]))
+            [cljs.nodejs :as nodejs]
+            [cljs.pprint :as pprint]))
 
 
 (nodejs/enable-util-print!)
@@ -47,18 +48,12 @@
 
 (defn validate-vega-lite
   [vega-lite-json]
-  (let [ajv (js/Ajv.)
+  (let [ajv (ajv)
         _ (.addMetaSchema ajv @schema-draft-6)
         validator (.compile ajv @vega-lite-schema)]
     (validator vega-lite-json)
     {:errors (js->clj (.-errors validator))
      :warnings (js->clj (.-warnings validator))}))
-
-
-(defn validate-vega-file
-  [fname]
-  (-> (load-json-file fname)
-      (validate-vega)))
 
 
 (defn infer-vega-type
@@ -95,13 +90,13 @@
       errors?
       (do
         (println "Errors:")
-        (println errors))
+        (pprint/pprint errors))
       warnings?
       (do
         (println "Warnings:")
-        (println warnings)
+        (pprint/pprint warnings)
         ))
-    (if errors -1 0)))
+    (if errors? -1 0)))
 
 
 (defmulti vega-json->view
@@ -131,12 +126,18 @@
       vega-json->view))
 
 
+(def supported-formats
+  #{"png" "jpg" "jpeg" "svg" "pdf"})
+
+
 (defn render-vega-json
   [json-data output-fname]
   (let [view (vega-json->view json-data)
         format (-> (str/split output-fname #"\.")
                    (last)
                    (.toLowerCase))
+        _ (when-not (contains? supported-formats format)
+            (throw (js/Error. (format "Unsupported format: %s" format))))
         pdf? (= "pdf" format)
         svg? (= "svg" format)]
     (if (not svg?)
@@ -178,22 +179,25 @@
 
 
 (defn -main [& args]
-  (let [cmd (first args)]
-    (cond
-      (or (= "--validate" cmd)
-          (= "-v" cmd))
-      (do
-        (assert (= 2 (count args)))
-        (validate-file (second args)))
-      (or (= "--render" cmd)
-          (= "-r" cmd))
-      (do
-        (assert (= 3 (count args)))
-        (let [validate-result (validate-file (nth args 1))]
-          (when (= 0 validate-result)
-            (render-file (nth args 1) (nth args 2)))
-          validate-result))
-      :else
-      (usage))))
+  (try
+    (let [cmd (first args)]
+      (cond
+        (or (= "--validate" cmd)
+            (= "-v" cmd))
+        (do
+          (assert (= 2 (count args)))
+          (validate-file (second args)))
+        (or (= "--render" cmd)
+            (= "-r" cmd))
+        (do
+          (assert (= 3 (count args)))
+          (let [validate-result (validate-file (nth args 1))]
+            (when (= 0 validate-result)
+              (render-file (nth args 1) (nth args 2)))
+            validate-result))
+        :else
+        (usage)))
+    (catch :default e
+      (println "Error!!" e))))
 
 (set! *main-cli-fn* -main)

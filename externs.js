@@ -17,3 +17,6 @@ view.toCanvas = [];
 view.toSVG = [];
 var canvas = {};
 canvas.toBuffer = {};
+var validator = {};
+validator.errors = [];
+validator.warnings = [];
