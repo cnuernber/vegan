@@ -14,5 +14,6 @@ var vega_lite = {};
 vega_lite.compile = [];
 var view = {};
 view.toCanvas = [];
+view.toSVG = [];
 var canvas = {};
 canvas.toBuffer = {};

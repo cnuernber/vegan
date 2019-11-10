@@ -3,7 +3,7 @@
 A nodejs clojurescript library designed to validate and render vega and vega-lite
 files.
 
-## Usage
+## Installation
 
 1.  Install nodejs.
 2.  I had to [setup](http://npm.github.io/installation-setup-docs/installing/a-note-on-permissions.html) 
@@ -12,6 +12,15 @@ files.
 3.  `make prod`
 4.  vegan is now installed in your modules.  The odd thing is that it links back
     to this repository so you can never remove this repo...
+	
+	
+## Usage
+
+```console
+Arguments:
+-v, --validate fname - validate vega file indicated by fname.
+-r --render src-file dst-file - render vega to a png, svg, jpg, or pdf file.
+```
 
 
 ## Next Steps
