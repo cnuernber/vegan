@@ -1,13 +1,12 @@
 (ns vegan.app
   (:require [clojure.string :as str]
-            [cljs.nodejs :as nodejs]
-            [cljsjs.ajv :as ajv]))
+            [cljs.nodejs :as nodejs]))
 
 
 (nodejs/enable-util-print!)
 
 (def fs (js/require "fs"))
-
+(def ajv (js/require "ajv"))
 
 (defn load-json-file
   [fname]
@@ -19,9 +18,16 @@
   js/__dirname)
 
 
+(defn resource-dir
+  []
+  (if (.existsSync fs (str (dirname) "/resources"))
+    (str (dirname) "/resources/")
+    "resources/"))
+
+
 (defn load-resource-json-file
   [fname]
-  (load-json-file (str "resources/" fname)))
+  (load-json-file (str (resource-dir) fname)))
 
 
 (def vega-schema (delay (load-resource-json-file "vega-schema.json")))
@@ -31,7 +37,7 @@
 
 (defn validate-vega
   [vega-json]
-  (let [ajv (js/Ajv. (clj->js {"schemaId" "id"}))
+  (let [ajv (ajv (clj->js {"schemaId" "id"}))
         _ (.addMetaSchema ajv @schema-draft-4)
         validator (.compile ajv @vega-schema)]
     (validator vega-json)
