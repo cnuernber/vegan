@@ -18,8 +18,8 @@ files.
 
 * Command line needs improving.  Use a real node cli library, add in support for at
 at least scaling chart to different sizes.
-* Get the module up on npm as an npm module.  Then the install is npm -i just like
-* anything else.  Maybe then have a public API on it so people can use it in their
+* Get the module up on npm as an npm module.  Then the install is npm -i just like 
+  anything else.  Maybe then have a public API on it so people can use it in their
   thing.
 
 
