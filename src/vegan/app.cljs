@@ -114,7 +114,7 @@
 
 (defmethod vega-json->view :vega
   [json-data]
-  (let [runtime (.parse vega (load-json-file "bar-chart.vg.json"))]
+  (let [runtime (.parse vega json-data)]
     (new (aget vega "View") runtime)))
 
 
