@@ -3,6 +3,11 @@
 A nodejs clojurescript library designed to validate and render vega and vega-lite
 files.
 
+* Please consider [vega-cli](https://www.npmjs.com/package/vega-cli)
+* Contributing to [nashorn vega](https://github.com/vega/vega/issues/601)
+
+Currently this does validation and server-side rendering. 
+
 ## Installation
 
 1.  Install nodejs.
