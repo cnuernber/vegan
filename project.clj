@@ -4,7 +4,7 @@
   :license {:name "EPL-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.1"]
-                 [org.clojure/clojurescript "1.10.520"]]
+                 [org.clojure/clojurescript "1.10.597"]]
   :plugins [[lein-cljsbuild "1.1.7"]
             [lein-figwheel "0.5.19"]]
 
@@ -34,5 +34,4 @@
                                    :externs ["externs.js"]
                                    :output-to "prod/app.js"
                                    :output-dir "prod/out"
-                                   :optimizations :advanced}}]}
-  )
+                                   :optimizations :advanced}}]})

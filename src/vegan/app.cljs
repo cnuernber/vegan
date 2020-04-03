@@ -6,8 +6,16 @@
 
 (nodejs/enable-util-print!)
 
+(defn print-exception
+  [e]
+  (println "Exception:")
+  (println e)
+  (.trace js/console))
+
+
 (def fs (js/require "fs"))
 (def ajv (js/require "ajv"))
+(def canvas (js/require "canvas"))
 
 (defn load-json-file
   [fname]
@@ -156,14 +164,14 @@
                        (.writeFileSync fs output-fname buffer)
                        (println "successfully wrote" output-fname))
                      (catch :default e
-                       (println "ERROR!!" e))))))
+                       (print-exception e))))))
       (-> (.toSVG view)
           (.then (fn [svg-text]
                    (try
                      (.writeFileSync fs output-fname svg-text)
                      (println "successfully wrote" output-fname)
                      (catch :default e
-                       (println "ERROR!!" e)))))))))
+                       (print-exception e)))))))))
 
 (defn render-file
   [src-fname dst-fname]
@@ -177,9 +185,20 @@
 -r --render src-file dst-file - render vega to a png, svg, jpg, or pdf file.")
   0)
 
+(defn check-canvas-sanity
+  []
+  (let [canvas (.createCanvas canvas 200 200)
+        _ (when-not canvas
+            (throw (js/Error. "Failed to allocated test canvas - create-canvas failed")))
+        ctx (.getContext canvas "2d")
+        _ (when-not ctx
+            (throw (js/Error. "Failed to allocate 2d context - getContext returned nil")))]
+    :ok))
+
 
 (defn -main [& args]
   (try
+    (check-canvas-sanity)
     (let [cmd (first args)]
       (cond
         (or (= "--validate" cmd)
@@ -198,6 +217,6 @@
         :else
         (usage)))
     (catch :default e
-      (println "Error!!" e))))
+      (print-exception e))))
 
 (set! *main-cli-fn* -main)

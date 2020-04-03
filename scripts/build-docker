@@ -1,0 +1,6 @@
+#!/bin/bash
+
+make prod
+
+docker build -t vegan .
+
