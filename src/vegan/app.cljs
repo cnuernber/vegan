@@ -6,16 +6,24 @@
 
 (nodejs/enable-util-print!)
 
-(defn print-exception
-  [e]
-  (println "Exception:")
-  (println e)
-  (.trace js/console))
 
 
 (def fs (js/require "fs"))
 (def ajv (js/require "ajv"))
 (def canvas (js/require "canvas"))
+
+
+(def STDOUT 0)
+(def STDIN 1)
+(def STDERR 2)
+
+(defn print-exception
+  [e]
+  (.writeSync fs STDERR "Exception:\n")
+  (.writeSync fs STDERR (with-out-str
+                          (println e)))
+  (.fsyncSync fs STDERR)
+  (.trace js/console))
 
 (defn load-json-file
   [fname]
