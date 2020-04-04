@@ -1,5 +1,0 @@
-#!/bin/bash
-
-MOUNT_DIR=$1
-
-docker run -v $MOUNT_DIR:/data vegan ${@:2}
